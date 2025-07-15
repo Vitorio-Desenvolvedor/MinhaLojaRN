@@ -1,49 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import TelaLogin from './src/telas/TelaLogin';
-import TelaProdutos from './src/telas/TelaProdutos';
+import TelaLogin from "./src/telas/TelaLogin";
+import TelaProdutos from "./src/telas/TelaProdutos";
+import TelaDetalhesProduto from "./src/telas/TelaDetalhesProduto";
 
-import { obterToken, removerToken } from './src/servicos/servicoArmazenamento';
-import api from './src/api/axiosConfig'; // Axios já configurado com interceptores
+import { obterToken, removerToken } from "./src/servicos/servicoArmazenamento";
+import api from "./src/api/axiosConfig";
+
+const Pilha = createNativeStackNavigator();
 
 export default function App() {
-  // Estado para saber se o usuário está logado ou não
   const [autenticado, setAutenticado] = useState<boolean | null>(null);
-
-  // Estado para saber se ainda estamos verificando o token
   const [carregandoInicial, setCarregandoInicial] = useState(true);
 
-  // Roda uma vez ao abrir o app, para checar se já existe um token salvo
   useEffect(() => {
     const verificarAutenticacao = async () => {
-      const token = await obterToken(); // tenta pegar o token salvo no dispositivo
-
+      const token = await obterToken();
       if (token) {
-        // Se achou o token, já configura ele no Axios
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        setAutenticado(true); // usuário está logado
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        setAutenticado(true);
       } else {
-        setAutenticado(false); // usuário não está logado
+        setAutenticado(false);
       }
-
-      setCarregandoInicial(false); // terminou a verificação
+      setCarregandoInicial(false);
     };
 
     verificarAutenticacao();
-
-    // O interceptor de resposta já foi configurado no axiosConfig.ts
-    // Ele cuida de apagar o token se ele estiver inválido
   }, []);
 
-  // Função que será chamada quando o usuário clicar em “Sair”
   const lidarComLogout = async () => {
-    await removerToken(); // apaga o token do armazenamento
-    delete api.defaults.headers.common['Authorization']; // remove o token do Axios
-    setAutenticado(false); // volta para a tela de login
+    await removerToken();
+    delete api.defaults.headers.common["Authorization"];
+    setAutenticado(false);
   };
 
-  // Enquanto está verificando se o usuário está logado, mostra um carregando
   if (carregandoInicial) {
     return (
       <View style={estilos.containerCentral}>
@@ -52,20 +45,32 @@ export default function App() {
     );
   }
 
-  // Se o usuário está autenticado, mostra a tela de produtos
-  if (autenticado) {
-    return <TelaProdutos aoLogout={lidarComLogout} />;
-  }
-
-  // Senão, mostra a tela de login
-  return <TelaLogin aoLoginSucesso={() => setAutenticado(true)} />;
+  return (
+    <NavigationContainer>
+      <Pilha.Navigator screenOptions={{ headerShown: false }}>
+        {autenticado ? (
+          <Pilha.Group>
+            <Pilha.Screen name="Produtos">
+              {(props) => <TelaProdutos {...props} aoLogout={lidarComLogout} />}
+            </Pilha.Screen>
+            <Pilha.Screen name="DetalhesProduto" component={TelaDetalhesProduto} />
+          </Pilha.Group>
+        ) : (
+          <Pilha.Group>
+            <Pilha.Screen name="Login">
+              {(props) => <TelaLogin {...props} aoLoginSucesso={() => setAutenticado(true)} />}
+            </Pilha.Screen>
+          </Pilha.Group>
+        )}
+      </Pilha.Navigator>
+    </NavigationContainer>
+  );
 }
 
-// Estilo do carregamento
 const estilos = StyleSheet.create({
   containerCentral: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

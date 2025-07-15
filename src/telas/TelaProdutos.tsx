@@ -1,10 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import { useNavigation } from "@react-navigation/native"; // Adicione esta linha
+
+import React, { useState, useEffect } from "react";
 import {
-  View, Text, FlatList, ActivityIndicator, StyleSheet,
-  TextInput, TouchableOpacity, Image
-} from 'react-native';
-import { obterTodosProdutos } from '../servicos/servicoProdutos';
-import { ProdutoAPI } from '../tipos/api';
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Image,
+} from "react-native";
+
+import { obterTodosProdutos } from "../servicos/servicoProdutos";
+import { ProdutoAPI } from "../tipos/api";
+import TelaDetalhesProduto from "./TelaDetalhesProduto";
+
+export default function TelaProdutos ({ aoLogout }: ) TelaDetalhesProduto) {
+  const navegacao = useNavigation (); 
+
+  const navegacao [setListaProdutos, setListaProdutos] = useState<produtoAPI[]>([]);
+}
 
 interface TelaProdutosProps {
   aoLogout: () => void;
@@ -50,16 +66,24 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
     }
   }, [termoBusca, listaProdutos]);
 
+
   const renderizarItemProduto = ({ item }: { item: ProdutoAPI }) => (
-    <View style={estilos.itemProduto}>
+    <TouchableOpacity
+      style={estilos.itemProduto}
+      onPress={() =>
+        navegacao.navigate("DetalhesProduto", { produtoId: item.id })
+      }
+    >
       <Image source={{ uri: item.image }} style={estilos.imagemProduto} />
+  
       <View style={estilos.detalhesProduto}>
         <Text style={estilos.tituloProduto}>{item.title}</Text>
         <Text style={estilos.categoriaProduto}>{item.category}</Text>
         <Text style={estilos.precoProduto}>R$ {item.price.toFixed(2)}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
+    
 
   if (carregandoProdutos) {
     return (
