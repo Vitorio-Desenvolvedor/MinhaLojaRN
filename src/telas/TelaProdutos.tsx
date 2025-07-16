@@ -1,6 +1,4 @@
-import { useNavigation } from "@react-navigation/native"; // Adicione esta linha
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,38 +10,41 @@ import {
   Image,
 } from "react-native";
 
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RotasPrincipais } from "../tipos/tiposRotas";
+
 import { obterTodosProdutos } from "../servicos/servicoProdutos";
 import { ProdutoAPI } from "../tipos/api";
-import TelaDetalhesProduto from "./TelaDetalhesProduto";
-
-export default function TelaProdutos ({ aoLogout }: ) TelaDetalhesProduto) {
-  const navegacao = useNavigation (); 
-
-  const navegacao [setListaProdutos, setListaProdutos] = useState<produtoAPI[]>([]);
-}
 
 interface TelaProdutosProps {
   aoLogout: () => void;
 }
 
+type NavegacaoProps = NativeStackNavigationProp<RotasPrincipais, "Produtos">;
+
 export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
+  const navegacao = useNavigation<NavegacaoProps>();
+
   const [listaProdutos, setListaProdutos] = useState<ProdutoAPI[]>([]);
   const [produtosFiltrados, setProdutosFiltrados] = useState<ProdutoAPI[]>([]);
   const [carregandoProdutos, setCarregandoProdutos] = useState(true);
-  const [mensagemErro, setMensagemErro] = useState('');
-  const [termoBusca, setTermoBusca] = useState('');
+  const [mensagemErro, setMensagemErro] = useState("");
+  const [termoBusca, setTermoBusca] = useState("");
 
+  // Buscar todos os produtos da API
   useEffect(() => {
     const carregarProdutos = async () => {
       setCarregandoProdutos(true);
-      setMensagemErro('');
+      setMensagemErro("");
+
       try {
         const produtos = await obterTodosProdutos();
         setListaProdutos(produtos);
         setProdutosFiltrados(produtos);
       } catch (erro: any) {
-        setMensagemErro(erro.message || 'Erro ao buscar produtos.');
-        if (erro.message.includes('Sessão expirada')) {
+        setMensagemErro(erro.message || "Erro ao buscar produtos.");
+        if (erro.message.includes("Sessão expirada")) {
           aoLogout();
         }
       } finally {
@@ -54,11 +55,12 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
     carregarProdutos();
   }, [aoLogout]);
 
+  // Filtro de busca (por título ou categoria)
   useEffect(() => {
-    if (termoBusca === '') {
+    if (termoBusca === "") {
       setProdutosFiltrados(listaProdutos);
     } else {
-      const encontrados = listaProdutos.filter(p =>
+      const encontrados = listaProdutos.filter((p) =>
         p.title.toLowerCase().includes(termoBusca.toLowerCase()) ||
         p.category.toLowerCase().includes(termoBusca.toLowerCase())
       );
@@ -66,7 +68,7 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
     }
   }, [termoBusca, listaProdutos]);
 
-
+  // Renderiza cada item da lista
   const renderizarItemProduto = ({ item }: { item: ProdutoAPI }) => (
     <TouchableOpacity
       style={estilos.itemProduto}
@@ -75,7 +77,6 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
       }
     >
       <Image source={{ uri: item.image }} style={estilos.imagemProduto} />
-  
       <View style={estilos.detalhesProduto}>
         <Text style={estilos.tituloProduto}>{item.title}</Text>
         <Text style={estilos.categoriaProduto}>{item.category}</Text>
@@ -83,8 +84,8 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
       </View>
     </TouchableOpacity>
   );
-    
 
+  
   if (carregandoProdutos) {
     return (
       <View style={estilos.containerCentral}>
@@ -93,6 +94,7 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
       </View>
     );
   }
+
 
   if (mensagemErro) {
     return (
@@ -131,23 +133,81 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
   );
 }
 
+// Estilos
 const estilos = StyleSheet.create({
-  container: { flex: 1, paddingTop: 50, paddingHorizontal: 10 },
-  containerCentral: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  cabecalho: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  tituloPagina: { fontSize: 26 },
-  botaoLogout: { paddingVertical: 8, paddingHorizontal: 15, borderRadius: 5 },
-  textoBotao: { fontSize: 14 },
-  inputBusca: { width: '100%', padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, marginBottom: 15 },
-  itemProduto: {
-    flexDirection: 'row', padding: 15, borderWidth: 1, borderColor: '#eee',
-    borderRadius: 8, marginBottom: 10, alignItems: 'center'
+  container: {
+    flex: 1,
+    paddingTop: 50,
+    paddingHorizontal: 10,
   },
-  imagemProduto: { width: 60, height: 60, borderRadius: 5, marginRight: 15 },
-  detalhesProduto: { flex: 1 },
-  tituloProduto: { fontSize: 16, marginBottom: 5 },
-  categoriaProduto: { fontSize: 12, marginBottom: 5, opacity: 0.7 },
-  precoProduto: { fontSize: 15, fontWeight: 'bold' },
-  listaConteudo: { paddingBottom: 20 },
-  mensagemErro: { textAlign: 'center', marginBottom: 20, color: 'red' },
+  containerCentral: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  cabecalho: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  tituloPagina: {
+    fontSize: 26,
+  },
+  botaoLogout: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+  },
+  textoBotao: {
+    fontSize: 14,
+  },
+  inputBusca: {
+    width: "100%",
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  itemProduto: {
+    flexDirection: "row",
+    padding: 15,
+    borderWidth: 1,
+    borderColor: "#eee",
+    borderRadius: 8,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  imagemProduto: {
+    width: 60,
+    height: 60,
+    borderRadius: 5,
+    marginRight: 15,
+  },
+  detalhesProduto: {
+    flex: 1,
+  },
+  tituloProduto: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  categoriaProduto: {
+    fontSize: 12,
+    marginBottom: 5,
+    opacity: 0.7,
+  },
+  precoProduto: {
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+  listaConteudo: {
+    paddingBottom: 20,
+  },
+  mensagemErro: {
+    textAlign: "center",
+    marginBottom: 20,
+    color: "red",
+  },
 });

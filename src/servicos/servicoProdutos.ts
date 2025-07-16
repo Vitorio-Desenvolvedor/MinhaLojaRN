@@ -1,8 +1,6 @@
-// Já deve existir:
 import api from "../api/axiosConfig";
 import { ProdutoAPI } from "../tipos/api";
 
-// Função já existente
 export async function obterTodosProdutos(): Promise<ProdutoAPI[]> {
   try {
     const resposta = await api.get<ProdutoAPI[]>("products");

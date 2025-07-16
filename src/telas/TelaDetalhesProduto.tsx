@@ -12,7 +12,6 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { obterProdutoPorId } from "../servicos/servicoProdutos";
 import { ProdutoAPI } from "../tipos/api";
 
-// Definindo o tipo dos parâmetros que essa tela espera receber
 type DetalhesProdutoRotaParametros = {
   produtoId: number;
 };
@@ -21,15 +20,12 @@ export default function TelaDetalhesProduto() {
   const rota = useRoute();
   const navegacao = useNavigation();
 
-  // Pegamos o produtoId que foi passado pela rota anterior
   const { produtoId } = rota.params as DetalhesProdutoRotaParametros;
 
-  // Estados locais para armazenar os dados
   const [produto, setProduto] = useState<ProdutoAPI | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [mensagemErro, setMensagemErro] = useState("");
 
-  // useEffect roda quando o componente é carregado ou produtoId muda
   useEffect(() => {
     const carregarDetalhesProduto = async () => {
       setCarregando(true);
@@ -49,7 +45,6 @@ export default function TelaDetalhesProduto() {
     carregarDetalhesProduto();
   }, [produtoId]);
 
-  // Enquanto está buscando os dados
   if (carregando) {
     return (
       <View style={estilos.containerCentral}>
@@ -59,7 +54,6 @@ export default function TelaDetalhesProduto() {
     );
   }
 
-  // Se ocorrer erro na busca
   if (mensagemErro) {
     return (
       <View style={estilos.containerCentral}>
@@ -74,7 +68,6 @@ export default function TelaDetalhesProduto() {
     );
   }
 
-  // Se não encontrou o produto (não deveria acontecer normalmente)
   if (!produto) {
     return (
       <View style={estilos.containerCentral}>
@@ -116,7 +109,7 @@ export default function TelaDetalhesProduto() {
   );
 }
 
-// Estilo visual
+// Estilo
 const estilos = StyleSheet.create({
   container: {
     flex: 1,
