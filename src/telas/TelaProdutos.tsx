@@ -17,6 +17,7 @@ import { RotasPrincipais } from "../tipos/tiposRotas";
 import { obterTodosProdutos } from "../servicos/servicoProdutos";
 import { ProdutoAPI } from "../tipos/api";
 
+// Props da tela
 interface TelaProdutosProps {
   aoLogout: () => void;
 }
@@ -32,7 +33,6 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
   const [mensagemErro, setMensagemErro] = useState("");
   const [termoBusca, setTermoBusca] = useState("");
 
-  // Buscar todos os produtos da API
   useEffect(() => {
     const carregarProdutos = async () => {
       setCarregandoProdutos(true);
@@ -55,7 +55,6 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
     carregarProdutos();
   }, [aoLogout]);
 
-  // Filtro de busca (por título ou categoria)
   useEffect(() => {
     if (termoBusca === "") {
       setProdutosFiltrados(listaProdutos);
@@ -68,7 +67,6 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
     }
   }, [termoBusca, listaProdutos]);
 
-  // Renderiza cada item da lista
   const renderizarItemProduto = ({ item }: { item: ProdutoAPI }) => (
     <TouchableOpacity
       style={estilos.itemProduto}
@@ -85,7 +83,6 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
     </TouchableOpacity>
   );
 
-  
   if (carregandoProdutos) {
     return (
       <View style={estilos.containerCentral}>
@@ -94,7 +91,6 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
       </View>
     );
   }
-
 
   if (mensagemErro) {
     return (
@@ -111,14 +107,21 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
     <View style={estilos.container}>
       <View style={estilos.cabecalho}>
         <Text style={estilos.tituloPagina}>Produtos</Text>
-        <TouchableOpacity style={estilos.botaoLogout} onPress={aoLogout}>
-          <Text style={estilos.textoBotao}>Sair</Text>
-        </TouchableOpacity>
+
+        <View style={estilos.botoesCabecalho}>
+          <TouchableOpacity style={estilos.botaoBusca} onPress={() => navegacao.navigate("BuscaProdutos")}>
+            <Text style={estilos.textoBotao}>Buscar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={estilos.botaoLogout} onPress={aoLogout}>
+            <Text style={estilos.textoBotao}>Sair</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <TextInput
         style={estilos.inputBusca}
-        placeholder="Pesquisar produtos..."
+        placeholder="Pesquisar produtos nesta tela..."
         value={termoBusca}
         onChangeText={setTermoBusca}
       />
@@ -155,10 +158,21 @@ const estilos = StyleSheet.create({
   tituloPagina: {
     fontSize: 26,
   },
+  botoesCabecalho: {
+    flexDirection: "row",
+    gap: 10,
+  },
   botaoLogout: {
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 5,
+    backgroundColor: "#eee",
+  },
+  botaoBusca: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    backgroundColor: "#d0f0ff",
   },
   textoBotao: {
     fontSize: 14,
