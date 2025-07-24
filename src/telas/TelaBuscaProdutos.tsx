@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   FlatList,
   ActivityIndicator,
   StyleSheet,
@@ -17,17 +16,20 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RotasPrincipais } from "../tipos/tiposRotas";
 
+import debounce from "lodash.debounce";
+
 type NavegacaoProps = NativeStackNavigationProp<RotasPrincipais, "BuscaProdutos">;
 
 export default function TelaBuscaProdutos() {
   const navegacao = useNavigation<NavegacaoProps>();
 
-  const [termo, setTermo] = useState("");
+  const [termo, setTermo] = useState(""); // texto da busca
   const [produtos, setProdutos] = useState<ProdutoAPI[]>([]);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
 
-  const buscarProdutos = async () => {
+  // Função que realiza a busca com atraso (debounce de 500ms)
+  const debouncedBuscar = debounce(async (texto: string) => {
     setCarregando(true);
     setErro("");
     setProdutos([]);
@@ -36,8 +38,8 @@ export default function TelaBuscaProdutos() {
       const todosProdutos = await obterTodosProdutos();
 
       const filtrados = todosProdutos.filter((p) =>
-        p.title.toLowerCase().includes(termo.toLowerCase()) ||
-        p.category.toLowerCase().includes(termo.toLowerCase())
+        p.title.toLowerCase().includes(texto.toLowerCase()) ||
+        p.category.toLowerCase().includes(texto.toLowerCase())
       );
 
       setProdutos(filtrados);
@@ -46,8 +48,9 @@ export default function TelaBuscaProdutos() {
     } finally {
       setCarregando(false);
     }
-  };
+  }, 500); // espera 500ms após digitação
 
+  // Cada produto da lista
   const renderizarProduto = ({ item }: { item: ProdutoAPI }) => (
     <TouchableOpacity
       style={estilos.item}
@@ -68,9 +71,11 @@ export default function TelaBuscaProdutos() {
         style={estilos.input}
         placeholder="Digite um termo para buscar"
         value={termo}
-        onChangeText={setTermo}
+        onChangeText={(texto) => {
+          setTermo(texto);
+          debouncedBuscar(texto); // chama busca com atraso
+        }}
       />
-      <Button title="Buscar" onPress={buscarProdutos} />
 
       {carregando && <ActivityIndicator size="large" style={{ marginTop: 20 }} />}
       {erro !== "" && <Text style={estilos.erro}>{erro}</Text>}
@@ -85,7 +90,7 @@ export default function TelaBuscaProdutos() {
   );
 }
 
-
+// Estilos visuais da tela
 const estilos = StyleSheet.create({
   container: {
     flex: 1,

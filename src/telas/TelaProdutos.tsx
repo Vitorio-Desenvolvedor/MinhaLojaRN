@@ -16,8 +16,8 @@ import { RotasPrincipais } from "../tipos/tiposRotas";
 
 import { obterTodosProdutos } from "../servicos/servicoProdutos";
 import { ProdutoAPI } from "../tipos/api";
+import { useCarrinho } from "../contexto/CarrinhoContext";
 
-// Props da tela
 interface TelaProdutosProps {
   aoLogout: () => void;
 }
@@ -26,6 +26,7 @@ type NavegacaoProps = NativeStackNavigationProp<RotasPrincipais, "Produtos">;
 
 export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
   const navegacao = useNavigation<NavegacaoProps>();
+  const { adicionarAoCarrinho } = useCarrinho();
 
   const [listaProdutos, setListaProdutos] = useState<ProdutoAPI[]>([]);
   const [produtosFiltrados, setProdutosFiltrados] = useState<ProdutoAPI[]>([]);
@@ -68,19 +69,29 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
   }, [termoBusca, listaProdutos]);
 
   const renderizarItemProduto = ({ item }: { item: ProdutoAPI }) => (
-    <TouchableOpacity
-      style={estilos.itemProduto}
-      onPress={() =>
-        navegacao.navigate("DetalhesProduto", { produtoId: item.id })
-      }
-    >
-      <Image source={{ uri: item.image }} style={estilos.imagemProduto} />
-      <View style={estilos.detalhesProduto}>
-        <Text style={estilos.tituloProduto}>{item.title}</Text>
-        <Text style={estilos.categoriaProduto}>{item.category}</Text>
-        <Text style={estilos.precoProduto}>R$ {item.price.toFixed(2)}</Text>
-      </View>
-    </TouchableOpacity>
+    <View style={estilos.itemProduto}>
+      <TouchableOpacity
+        style={{ flex: 1 }}
+        onPress={() =>
+          navegacao.navigate("DetalhesProduto", { produtoId: item.id })
+        }
+      >
+        <Image source={{ uri: item.image }} style={estilos.imagemProduto} />
+        <View style={estilos.detalhesProduto}>
+          <Text style={estilos.tituloProduto}>{item.title}</Text>
+          <Text style={estilos.categoriaProduto}>{item.category}</Text>
+          <Text style={estilos.precoProduto}>R$ {item.price.toFixed(2)}</Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Botão Adicionar ao Carrinho */}
+      <TouchableOpacity
+        style={estilos.botaoCarrinho}
+        onPress={() => adicionarAoCarrinho(item)}
+      >
+        <Text style={estilos.textoBotaoCarrinho}>+</Text>
+      </TouchableOpacity>
+    </View>
   );
 
   if (carregandoProdutos) {
@@ -107,21 +118,14 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
     <View style={estilos.container}>
       <View style={estilos.cabecalho}>
         <Text style={estilos.tituloPagina}>Produtos</Text>
-
-        <View style={estilos.botoesCabecalho}>
-          <TouchableOpacity style={estilos.botaoBusca} onPress={() => navegacao.navigate("BuscaProdutos")}>
-            <Text style={estilos.textoBotao}>Buscar</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={estilos.botaoLogout} onPress={aoLogout}>
-            <Text style={estilos.textoBotao}>Sair</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={estilos.botaoLogout} onPress={aoLogout}>
+          <Text style={estilos.textoBotao}>Sair</Text>
+        </TouchableOpacity>
       </View>
 
       <TextInput
         style={estilos.inputBusca}
-        placeholder="Pesquisar produtos nesta tela..."
+        placeholder="Pesquisar produtos..."
         value={termoBusca}
         onChangeText={setTermoBusca}
       />
@@ -136,7 +140,6 @@ export default function TelaProdutos({ aoLogout }: TelaProdutosProps) {
   );
 }
 
-// Estilos
 const estilos = StyleSheet.create({
   container: {
     flex: 1,
@@ -158,21 +161,10 @@ const estilos = StyleSheet.create({
   tituloPagina: {
     fontSize: 26,
   },
-  botoesCabecalho: {
-    flexDirection: "row",
-    gap: 10,
-  },
   botaoLogout: {
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 5,
-    backgroundColor: "#eee",
-  },
-  botaoBusca: {
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    backgroundColor: "#d0f0ff",
   },
   textoBotao: {
     fontSize: 14,
@@ -223,5 +215,19 @@ const estilos = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
     color: "red",
+  },
+  botaoCarrinho: {
+    backgroundColor: "#27ae60",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 10,
+  },
+  textoBotaoCarrinho: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
   },
 });
