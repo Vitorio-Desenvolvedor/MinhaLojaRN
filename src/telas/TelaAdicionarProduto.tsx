@@ -3,28 +3,34 @@ import {
   View,
   Text,
   TextInput,
-  StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Alert,
+  StyleSheet,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RotasPrincipais } from "../tipos/tiposRotas";
+
+// Navegação tipada
+type NavegacaoProps = NativeStackNavigationProp<RotasPrincipais, "AdicionarProduto">;
 
 export default function TelaAdicionarProduto() {
-  const navegacao = useNavigation();
+  const navegacao = useNavigation<NavegacaoProps>();
 
   const [titulo, setTitulo] = useState("");
+  const [descricao, setDescricao] = useState("");
   const [preco, setPreco] = useState("");
   const [categoria, setCategoria] = useState("");
-  const [descricao, setDescricao] = useState("");
   const [imagem, setImagem] = useState("");
 
   const cadastrarProduto = () => {
-    if (!titulo || !preco || !categoria || !descricao || !imagem) {
+    if (!titulo || !descricao || !preco || !categoria || !imagem) {
       Alert.alert("Atenção", "Preencha todos os campos!");
       return;
     }
 
+    // Aqui você pode futuramente enviar para uma API
     Alert.alert("Sucesso", "Produto cadastrado com sucesso! (simulado)");
     navegacao.goBack();
   };
@@ -40,12 +46,21 @@ export default function TelaAdicionarProduto() {
         onChangeText={setTitulo}
       />
 
+      <Text style={estilos.label}>Descrição:</Text>
+      <TextInput
+        style={estilos.input}
+        multiline
+        numberOfLines={4}
+        value={descricao}
+        onChangeText={setDescricao}
+      />
+
       <Text style={estilos.label}>Preço:</Text>
       <TextInput
         style={estilos.input}
+        keyboardType="numeric"
         value={preco}
         onChangeText={setPreco}
-        keyboardType="decimal-pad"
       />
 
       <Text style={estilos.label}>Categoria:</Text>
@@ -55,16 +70,7 @@ export default function TelaAdicionarProduto() {
         onChangeText={setCategoria}
       />
 
-      <Text style={estilos.label}>Descrição:</Text>
-      <TextInput
-        style={estilos.input}
-        value={descricao}
-        onChangeText={setDescricao}
-        multiline
-        numberOfLines={4}
-      />
-
-      <Text style={estilos.label}>URL da Imagem:</Text>
+      <Text style={estilos.label}>Imagem (URL):</Text>
       <TextInput
         style={estilos.input}
         value={imagem}
@@ -91,26 +97,25 @@ const estilos = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontWeight: "bold",
+    fontSize: 16,
     marginBottom: 5,
   },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
     padding: 10,
+    borderRadius: 5,
     marginBottom: 15,
   },
   botao: {
-    backgroundColor: "#2980b9",
+    backgroundColor: "#27ae60",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
-    marginTop: 20,
   },
   textoBotao: {
     color: "#fff",
-    fontWeight: "bold",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });

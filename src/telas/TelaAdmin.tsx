@@ -2,84 +2,74 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
+  StyleSheet,
   TouchableOpacity,
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ProdutoAPI } from "../tipos/api";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import { obterTodosProdutos } from "../servicos/servicoProdutos";
+import { ProdutoAPI } from "../tipos/api";
+import { RotasPrincipais } from "../tipos/tiposRotas";
+
+// Tipo da navegação
+type NavegacaoProps = NativeStackNavigationProp<RotasPrincipais, "Admin">;
 
 export default function TelaAdmin() {
+  const navegacao = useNavigation<NavegacaoProps>();
+
   const [produtos, setProdutos] = useState<ProdutoAPI[]>([]);
-  const [carregando, setCarregando] = useState(true);
-  const navegacao = useNavigation();
 
   useEffect(() => {
-    const carregarProdutos = async () => {
+    const carregar = async () => {
       try {
-        const resultado = await obterTodosProdutos();
-        setProdutos(resultado);
-      } catch (error) {
-        console.error("Erro ao carregar produtos", error);
-      } finally {
-        setCarregando(false);
+        const lista = await obterTodosProdutos();
+        setProdutos(lista);
+      } catch (e) {
+        Alert.alert("Erro", "Não foi possível carregar os produtos.");
       }
     };
-
-    carregarProdutos();
+    carregar();
   }, []);
 
   const excluirProduto = (id: number) => {
-    Alert.alert("Excluir produto", "Tem certeza que deseja excluir?", [
-      {
-        text: "Cancelar",
-        style: "cancel",
-      },
-      {
-        text: "Excluir",
-        style: "destructive",
-        onPress: () => {
-          // Simula exclusão removendo da lista local
-          const novaLista = produtos.filter((p) => p.id !== id);
-          setProdutos(novaLista);
+    Alert.alert(
+      "Confirmar exclusão",
+      "Tem certeza que deseja excluir este produto?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
         },
-      },
-    ]);
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: () => {
+            setProdutos((produtos) =>
+              produtos.filter((produto) => produto.id !== id)
+            );
+          },
+        },
+      ]
+    );
   };
-
-  const editarProduto = (produtoId: number) => {
-    // Simula navegação para tela de edição (ainda será criada)
-    navegacao.navigate("EditarProduto", { produtoId });
-  };
-<TouchableOpacity
-  onPress={() => navegacao.navigate("AdicionarProduto")}
-  style={{ backgroundColor: "#3498db", padding: 10, borderRadius: 5, marginBottom: 15 }}
->
-  <Text style={{ color: "#fff", textAlign: "center", fontWeight: "bold" }}>
-    + Novo Produto
-  </Text>
-</TouchableOpacity>
 
   const renderizarItem = ({ item }: { item: ProdutoAPI }) => (
     <View style={estilos.itemProduto}>
-      <View style={{ flex: 1 }}>
-        <Text style={estilos.titulo}>{item.title}</Text>
-        <Text style={estilos.preco}>R$ {item.price.toFixed(2)}</Text>
-        <Text style={estilos.categoria}>{item.category}</Text>
-      </View>
-
-      <View style={estilos.botoesAcoes}>
+      <Text style={estilos.tituloProduto}>{item.title}</Text>
+      <View style={estilos.botoes}>
         <TouchableOpacity
-          style={[estilos.botao, estilos.botaoEditar]}
-          onPress={() => editarProduto(item.id)}
+          style={estilos.botaoEditar}
+          onPress={() =>
+            navegacao.navigate("EditarProduto", { produtoId: item.id }) // ✅ corrigido tipo aqui
+          }
         >
           <Text style={estilos.textoBotao}>Editar</Text>
         </TouchableOpacity>
-
         <TouchableOpacity
-          style={[estilos.botao, estilos.botaoExcluir]}
+          style={estilos.botaoExcluir}
           onPress={() => excluirProduto(item.id)}
         >
           <Text style={estilos.textoBotao}>Excluir</Text>
@@ -90,18 +80,21 @@ export default function TelaAdmin() {
 
   return (
     <View style={estilos.container}>
-      <Text style={estilos.tituloPagina}>Painel do Administrador</Text>
+      <Text style={estilos.titulo}>Administração de Produtos</Text>
 
-      {carregando ? (
-        <Text>Carregando produtos...</Text>
-      ) : (
-        <FlatList
-          data={produtos}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderizarItem}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
-      )}
+      <TouchableOpacity
+        onPress={() => navegacao.navigate("AdicionarProduto")}
+        style={estilos.botaoNovo}
+      >
+        <Text style={estilos.textoBotao}>+ Novo Produto</Text>
+      </TouchableOpacity>
+
+      <FlatList
+        data={produtos}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderizarItem}
+        contentContainerStyle={{ paddingBottom: 20 }}
+      />
     </View>
   );
 }
@@ -109,54 +102,49 @@ export default function TelaAdmin() {
 const estilos = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     paddingTop: 50,
+    paddingHorizontal: 15,
     backgroundColor: "#fff",
   },
-  tituloPagina: {
+  titulo: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 15,
   },
   itemProduto: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     padding: 15,
-    marginBottom: 10,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
-  titulo: {
+  tituloProduto: {
     fontSize: 16,
-    fontWeight: "bold",
+    marginBottom: 10,
   },
-  preco: {
-    fontSize: 14,
-    color: "#888",
-  },
-  categoria: {
-    fontSize: 12,
-    color: "#555",
-  },
-  botoesAcoes: {
-    justifyContent: "center",
-    alignItems: "center",
+  botoes: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
     gap: 10,
   },
-  botao: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
   botaoEditar: {
-    backgroundColor: "#3498db",
+    backgroundColor: "#2980b9",
+    padding: 8,
+    borderRadius: 5,
+    marginRight: 10,
   },
   botaoExcluir: {
-    backgroundColor: "#e74c3c",
+    backgroundColor: "#c0392b",
+    padding: 8,
+    borderRadius: 5,
   },
   textoBotao: {
     color: "#fff",
-    fontSize: 12,
     fontWeight: "bold",
+  },
+  botaoNovo: {
+    backgroundColor: "#27ae60",
+    padding: 12,
+    borderRadius: 5,
+    marginBottom: 20,
+    alignItems: "center",
   },
 });

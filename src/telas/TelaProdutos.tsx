@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RotasPrincipais } from "../tipos/tiposRotas";
 
 import { obterTodosProdutos } from "../servicos/servicoProdutos";
-import { ProdutoAPI } from "../tipos/api";
+import { ProdutoAPI } from "../tipos/api.js";
 import { useCarrinho } from "../contexto/CarrinhoContext";
 
 interface TelaProdutosProps {
