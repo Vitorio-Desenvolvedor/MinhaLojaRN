@@ -141,7 +141,7 @@ const estilos = StyleSheet.create({
     fontWeight: "bold",
   },
   botaoNovo: {
-    backgroundColor: "#27ae60",
+    backgroundColor: "#35b929ff",
     padding: 12,
     borderRadius: 5,
     marginBottom: 20,

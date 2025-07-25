@@ -12,37 +12,33 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { obterProdutoPorId } from "../servicos/servicoProdutos";
 import { ProdutoAPI } from "../tipos/api";
 
-type DetalhesProdutoRotaParametros = {
+type DetalhesProdutoParams = {
   produtoId: number;
 };
 
 export default function TelaDetalhesProduto() {
   const rota = useRoute();
   const navegacao = useNavigation();
-
-  const { produtoId } = rota.params as DetalhesProdutoRotaParametros;
+  const { produtoId } = rota.params as DetalhesProdutoParams;
 
   const [produto, setProduto] = useState<ProdutoAPI | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [mensagemErro, setMensagemErro] = useState("");
 
   useEffect(() => {
-    const carregarDetalhesProduto = async () => {
+    const carregar = async () => {
       setCarregando(true);
       setMensagemErro("");
       try {
-        const produtoEncontrado = await obterProdutoPorId(produtoId);
-        setProduto(produtoEncontrado);
-      } catch (erro: any) {
-        setMensagemErro(
-          erro.message || "Não foi possível carregar os detalhes do produto."
-        );
+        const p = await obterProdutoPorId(produtoId);
+        setProduto(p);
+      } catch (e: any) {
+        setMensagemErro(e.message || "Não foi possível carregar os detalhes.");
       } finally {
         setCarregando(false);
       }
     };
-
-    carregarDetalhesProduto();
+    carregar();
   }, [produtoId]);
 
   if (carregando) {
@@ -82,13 +78,9 @@ export default function TelaDetalhesProduto() {
     );
   }
 
-  // Exibe os detalhes do produto
   return (
     <ScrollView style={estilos.container}>
-      <TouchableOpacity
-        style={estilos.botaoVoltar}
-        onPress={() => navegacao.goBack()}
-      >
+      <TouchableOpacity style={estilos.botaoVoltar} onPress={() => navegacao.goBack()}>
         <Text style={estilos.textoBotao}>{"< Voltar"}</Text>
       </TouchableOpacity>
 
@@ -109,7 +101,6 @@ export default function TelaDetalhesProduto() {
   );
 }
 
-// Estilo
 const estilos = StyleSheet.create({
   container: {
     flex: 1,
@@ -175,7 +166,7 @@ const estilos = StyleSheet.create({
   },
   ratingTexto: {
     fontSize: 16,
-    color: "#3498db",
+    color: "#35b929ff",
     fontWeight: "bold",
   },
   mensagemErro: {

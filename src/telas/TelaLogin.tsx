@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
+
 import { realizarLogin } from '../servicos/servicoAutenticacao';
 import { salvarToken } from '../servicos/servicoArmazenamento';
 
@@ -10,28 +18,25 @@ interface TelaLoginProps {
 export default function TelaLogin({ aoLoginSucesso }: TelaLoginProps) {
   const [nomeUsuario, setNomeUsuario] = useState('');
   const [senhaUsuario, setSenhaUsuario] = useState('');
-  
   const [carregando, setCarregando] = useState(false);
-  
   const [mensagemErro, setMensagemErro] = useState('');
 
   const lidarComLogin = async () => {
-    setCarregando(true);       
-    setMensagemErro('');        
+    setCarregando(true);
+    setMensagemErro('');
 
     try {
       const resposta = await realizarLogin({
         usuario: nomeUsuario,
-        senha: senhaUsuario
+        senha: senhaUsuario,
       });
 
       await salvarToken(resposta.token);
-
       aoLoginSucesso();
     } catch (erro: any) {
       setMensagemErro(erro.message || 'Erro inesperado. Tente novamente.');
     } finally {
-      setCarregando(false); 
+      setCarregando(false);
     }
   };
 
@@ -39,7 +44,6 @@ export default function TelaLogin({ aoLoginSucesso }: TelaLoginProps) {
     <View style={estilos.container}>
       <Text style={estilos.titulo}>Login</Text>
 
-      {/* Campo do nome de usuário */}
       <TextInput
         style={estilos.input}
         placeholder="Nome de Usuário"
@@ -48,7 +52,6 @@ export default function TelaLogin({ aoLoginSucesso }: TelaLoginProps) {
         autoCapitalize="none"
       />
 
-      {/* Campo da senha */}
       <TextInput
         style={estilos.input}
         placeholder="Senha"
@@ -57,36 +60,35 @@ export default function TelaLogin({ aoLoginSucesso }: TelaLoginProps) {
         secureTextEntry
       />
 
-      {/* Mostra um spinner enquanto está carregando */}
       {carregando ? (
         <ActivityIndicator size="large" />
       ) : (
         <TouchableOpacity
           style={estilos.botao}
           onPress={lidarComLogin}
-          disabled={!nomeUsuario || !senhaUsuario} // botão só funciona se os dois campos estiverem preenchidos
+          disabled={!nomeUsuario || !senhaUsuario}
         >
           <Text style={estilos.textoBotao}>Entrar</Text>
         </TouchableOpacity>
       )}
 
-      {/* Mostra erro, se houver */}
-      {mensagemErro ? <Text style={estilos.mensagemErro}>{mensagemErro}</Text> : null}
+      {mensagemErro ? (
+        <Text style={estilos.mensagemErro}>{mensagemErro}</Text>
+      ) : null}
     </View>
   );
 }
 
-// Estilo da tela
 const estilos = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
+    padding: 20,
   },
   titulo: {
     fontSize: 24,
-    marginBottom: 20
+    marginBottom: 20,
   },
   input: {
     width: '100%',
@@ -94,21 +96,23 @@ const estilos = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
-    marginBottom: 10
+    marginBottom: 10,
   },
   botao: {
+    backgroundColor: '#007bff',
     width: '100%',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
-    marginTop: 10
+    marginTop: 10,
   },
   textoBotao: {
-    fontSize: 16
+    color: '#fff',
+    fontSize: 16,
   },
   mensagemErro: {
-    marginTop: 15, 
+    marginTop: 15,
     textAlign: 'center',
-    color: 'red'
+    color: 'red',
   },
 });

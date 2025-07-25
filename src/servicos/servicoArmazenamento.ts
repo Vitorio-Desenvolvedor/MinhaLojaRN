@@ -1,19 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Nome da "chave" onde o token será salvo no celular
-const CHAVE_TOKEN = '@minhalojarn:token';
+const CHAVE_TOKEN = "@minhalojarn:token";
 
-// Salva o token no armazenamento do dispositivo
-export async function salvarToken(token: string) {
+export async function salvarToken(token: string): Promise<void> {
   await AsyncStorage.setItem(CHAVE_TOKEN, token);
 }
 
-// Recupera o token salvo anteriormente
-export async function obterToken() {
-  return await AsyncStorage.getItem(CHAVE_TOKEN);
+export async function obterToken(): Promise<string | null> {
+  return AsyncStorage.getItem(CHAVE_TOKEN);
 }
 
-// Apaga o token do armazenamento (quando o usuário faz logout)
-export async function removerToken() {
+export async function removerToken(): Promise<void> {
   await AsyncStorage.removeItem(CHAVE_TOKEN);
 }
